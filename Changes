@@ -1,6 +1,9 @@
 Revision history for Perl extension Net::IP::Match.
 
+0.02  Do Okt 18 10:09:39 CEST 2007
+        - fixed version requirement of Test::More
+
 0.01  Wed Apr 10 14:29:32 2002
-	- original version; created by h2xs 1.20 with options
-		-XAn Net::IP::Match
+        - original version; created by h2xs 1.20 with options
+            -XAn Net::IP::Match
 

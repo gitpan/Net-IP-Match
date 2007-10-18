@@ -1,13 +1,10 @@
-use ExtUtils::MakeMaker;
-WriteMakefile(
-    'NAME'		=> 'Net::IP::Match',
-    'VERSION_FROM'	=> 'Match.pm',
-    'PREREQ_PM'		=> {
-	Filter::Simple => 0.77,
-    	Test::More     => 0.42,
-    },
-    dist                => {
-        # don't ask about existing .tar.gz files
-        COMPRESS => 'gzip --force --best'
-    },
-);
+use inc::Module::Install;
+name 'Net-IP-Match';
+all_from 'lib/Net/IP/Match.pm';
+perl_version '5.006';
+
+build_requires 'Test::More' => '0.70';
+
+use_standard_tests;
+auto_include;
+WriteAll;
