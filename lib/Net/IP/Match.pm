@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Filter::Simple;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 FILTER sub {
     	s[\b __MATCH_IP \s* \( (.*?) \s* , \s* (.*?) \s* \) ]
