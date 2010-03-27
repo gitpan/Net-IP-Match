@@ -16,63 +16,62 @@ using C<Net::IP::Raw>, but C<Net::IP::Raw> is almost 20 times faster
 than using C<Net::Netmask>.
 
 =cut
-
 use warnings;
 use strict;
 use Net::Netmask 'quad2int';
 use Net::IP::Match;
 use Benchmark;
-
 my @n = map { Net::Netmask->new($_) } qw{
-    10.0.0.0/8
-    87.134.66.128
-    87.134.87.0/24
-    145.97.0.0/16
-    192.168.0.0/16
+  10.0.0.0/8
+  87.134.66.128
+  87.134.87.0/24
+  145.97.0.0/16
+  192.168.0.0/16
 };
-
 my @t;
-for my $n (@n) {
-	my $bits = 32 - $n->bits;
-	my $mask = quad2int($n->base) >> $bits;
-	push @t => [ $mask, $bits ];
-}
 
+for my $n (@n) {
+    my $bits = 32 - $n->bits;
+    my $mask = quad2int($n->base) >> $bits;
+    push @t => [ $mask, $bits ];
+}
 chomp(my @data = <DATA>);
 
 sub netmask_loop_match {
-	for (@n) { return 1 if $_->match($_[0]) }
+    for (@n) { return 1 if $_->match($_[0]) }
 }
-
-timethese(20, {
-    netmask_loop_sub    => sub { netmask_loop_match($_) for @data },
-    netmask_loop_inline => sub {
-	for (@data) {
-		for my $n (@n) { next if $n->match($_) }
-	}
-    },
-    manual_inline => sub {
-	for (@data) {
-		my $q = unpack("N", pack("C4", split(/\./, $_)));
-		next if
-		   4093015 == $q >> 8  ||
-		     44048 == $q >> 16 ||
-		     49320 == $q >> 16 ||
-		1047806592 == $q       ||
-			10 == $q >> 24;
-	}
-    },
-    net_ip_match => sub {
-    	for (@data) {
-		next if __MATCH_IP($_, qw{ 10.0.0.0/8 87.134.66.128
-		    87.134.87.0/24 145.97.0.0/16 192.168.0.0/16 });
-	}
-    },
-});
+timethese(
+    20,
+    {   netmask_loop_sub => sub { netmask_loop_match($_) for @data },
+        netmask_loop_inline => sub {
+            for (@data) {
+                for my $n (@n) { next if $n->match($_) }
+            }
+        },
+        manual_inline => sub {
+            for (@data) {
+                my $q = unpack("N", pack("C4", split(/\./, $_)));
+                next
+                  if 4093015 == $q >> 8
+                      || 44048 == $q >> 16
+                      || 49320 == $q >> 16
+                      || 1047806592 == $q
+                      || 10 == $q >> 24;
+            }
+        },
+        net_ip_match => sub {
+            for (@data) {
+                next if __MATCH_IP(
+                          $_, qw{ 10.0.0.0/8 87.134.66.128
+                            87.134.87.0/24 145.97.0.0/16 192.168.0.0/16 }
+                );
+            }
+        },
+    }
+);
 
 # this sample list is from:
 # perl -lane'$h{$F[2]}++;$h{$F[4]}++;END{print for sort keys %h}' net-acct-small
-
 __DATA__
 10.0.1.38
 12.220.206.11
