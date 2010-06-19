@@ -3,39 +3,42 @@ use strict;
 use warnings;
 
 package Net::IP::Match;
-our $VERSION = '1.100860';
+BEGIN {
+  $Net::IP::Match::VERSION = '1.101700';
+}
+
 # ABSTRACT: Efficiently match IP addresses against IP ranges
 use Filter::Simple;
 FILTER sub {
     s[\b __MATCH_IP \s* \( (.*?) \s* , \s* (.*?) \s* \) ]
-	 [
-	    my @n = eval $2;
-	    my @t;
-	    for (@n) {
-		    my ($quad, $bits) = m!^(\d+\.\d+\.\d+\.\d+)(?:/(\d+))?!g;
-		    my $matchbits = 32 - ($bits || 32);
-		    my $int = unpack("N", pack("C4", split(/\./, $quad)));
-		    my $mask = $int >> $matchbits;
-		    push @t => { mask => $mask, bits => $matchbits };
-	    }
+     [
+        my @n = eval $2;
+        my @t;
+        for (@n) {
+            my ($quad, $bits) = m!^(\d+\.\d+\.\d+\.\d+)(?:/(\d+))?!g;
+            my $matchbits = 32 - ($bits || 32);
+            my $int = unpack("N", pack("C4", split(/\./, $quad)));
+            my $mask = $int >> $matchbits;
+            push @t => { mask => $mask, bits => $matchbits };
+        }
 
-	    my $unpack_code = qq!unpack("N", pack("C4", split(/\\./, $1)))!;
+        my $unpack_code = qq!unpack("N", pack("C4", split(/\\./, $1)))!;
 
-	    # if there's only one ip range to match against, we don't need
-	    # the temp variable and the do-block, so it's even faster
+        # if there's only one ip range to match against, we don't need
+        # the temp variable and the do-block, so it's even faster
 
-	    if (@t == 1) {
-		    local $_ = shift @t;
-		    "($_->{mask} == $unpack_code" .
-			($_->{bits} ? " >> $_->{bits}" : "") . ")"
-	    } else {
-		    my $var = '$__tmp_match_ip';
-		    my $cond = join ' || ' => map { "$_->{mask} == $var" .
-			($_->{bits} ? " >> $_->{bits}" : "") } @t;
-		    qq!do { my $var = $unpack_code; $cond }!
-	    }
+        if (@t == 1) {
+            local $_ = shift @t;
+            "($_->{mask} == $unpack_code" .
+            ($_->{bits} ? " >> $_->{bits}" : "") . ")"
+        } else {
+            my $var = '$__tmp_match_ip';
+            my $cond = join ' || ' => map { "$_->{mask} == $var" .
+            ($_->{bits} ? " >> $_->{bits}" : "") } @t;
+            qq!do { my $var = $unpack_code; $cond }!
+        }
 
-	 ]gsex;
+     ]gsex;
     print if $::debug;
 };
 1;
@@ -50,7 +53,7 @@ Net::IP::Match - Efficiently match IP addresses against IP ranges
 
 =head1 VERSION
 
-version 1.100860
+version 1.101700
 
 =head1 SYNOPSIS
 
@@ -58,7 +61,7 @@ version 1.100860
 
   if(__MATCH_IP($_, qw{10.0.0.0/8 87.134.66.128
     87.134.87.0/24 145.97.0.0/16})) {
-    	# ...
+        # ...
   }
 
 =head1 DESCRIPTION
@@ -162,7 +165,7 @@ See perlmodinstall for information and options on installing Perl modules.
 No bugs have been reported.
 
 Please report any bugs or feature requests through the web interface at
-L<http://rt.cpan.org/Public/Dist/Display.html?Name=Net-IP-Match>.
+L<http://rt.cpan.org>.
 
 =head1 AVAILABILITY
 

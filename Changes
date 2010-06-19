@@ -1,5 +1,8 @@
 Revision history for Perl extension Net-IP-Match
 
+1.101700  2010-06-19 11:01:25 Europe/Vienna
+    - converted tabs to spaces
+
 1.100860  2010-03-27 13:10:32 Europe/Vienna
     - converted the distribution to Dist::Zilla-style
 

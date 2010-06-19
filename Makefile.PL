@@ -4,41 +4,53 @@ use warnings;
 
  BEGIN { require 5.008; } 
 
-use ExtUtils::MakeMaker 6.11;
+use ExtUtils::MakeMaker 6.31;
 
 
 
 my %WriteMakefileArgs = (
-                       'test' => {
-                                   'TESTS' => 't/*.t'
-                                 },
-                       'NAME' => 'Net::IP::Match',
-                       'DISTNAME' => 'Net-IP-Match',
-                       'CONFIGURE_REQUIRES' => {
-                                                 'ExtUtils::MakeMaker' => '6.11'
-                                               },
-                       'AUTHOR' => 'Marcel Gruenauer <marcel@cpan.org>',
-                       'BUILD_REQUIRES' => {},
-                       'ABSTRACT' => 'Efficiently match IP addresses against IP ranges',
-                       'EXE_FILES' => [],
-                       'VERSION' => '1.100860',
-                       'PREREQ_PM' => {
-                                        'Scalar::Util' => '0',
-                                        'Filter::Simple' => '0',
-                                        'English' => '0',
-                                        'Benchmark' => '0',
-                                        'Carp' => '0',
-                                        'Test::More' => '0.88',
-                                        'Net::Netmask' => '0',
-                                        'File::Find' => '0',
-                                        'File::Temp' => '0'
-                                      },
-                       'LICENSE' => 'perl'
-                     );
+  'ABSTRACT' => 'Efficiently match IP addresses against IP ranges',
+  'AUTHOR' => 'Marcel Gruenauer <marcel@cpan.org>',
+  'BUILD_REQUIRES' => {
+    'Carp' => '0',
+    'English' => '0',
+    'File::Find' => '0',
+    'File::Temp' => '0',
+    'Scalar::Util' => '0',
+    'Test::More' => '0.94'
+  },
+  'CONFIGURE_REQUIRES' => {
+    'ExtUtils::MakeMaker' => '6.31'
+  },
+  'DISTNAME' => 'Net-IP-Match',
+  'EXE_FILES' => [],
+  'LICENSE' => 'perl',
+  'NAME' => 'Net::IP::Match',
+  'PREREQ_PM' => {
+    'Filter::Simple' => '0'
+  },
+  'VERSION' => '1.101700',
+  'test' => {
+    'TESTS' => 't/*.t'
+  }
+);
 
 
-delete $WriteMakefileArgs{LICENSE}
-  unless eval { ExtUtils::MakeMaker->VERSION(6.31) };
+unless ( eval { ExtUtils::MakeMaker->VERSION(6.56) } ) {
+  my $br = delete $WriteMakefileArgs{BUILD_REQUIRES};
+  my $pp = $WriteMakefileArgs{PREREQ_PM};
+  for my $mod ( keys %$br ) {
+    if ( exists $pp->{$mod} ) {
+      $pp->{$mod} = $br->{$mod} if $br->{$mod} > $pp->{$mod};
+    }
+    else {
+      $pp->{$mod} = $br->{$mod};
+    }
+  }
+}
+
+delete $WriteMakefileArgs{CONFIGURE_REQUIRES}
+  unless eval { ExtUtils::MakeMaker->VERSION(6.52) };
 
 WriteMakefile(%WriteMakefileArgs);
 
